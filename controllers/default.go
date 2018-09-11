@@ -1,9 +1,10 @@
 package controllers
 
 import (
-	"fmt"
+	// "fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/httplib"
+	"encoding/json"
 )
 
 type MainController struct {
@@ -25,10 +26,16 @@ type jsonResponse struct {
 }
 
 func (c *ApiController) Get() {
+	var jsonResponse map[string]interface{}
 	req := httplib.Get("http://api.openweathermap.org/data/2.5/weather?q=Bogota,co&appid=1508a9a4840a5574c822d70ca2132032")
 	data, _ := req.String()
-	fmt.Printf("%q\n", data)
-	jsonResponse := jsonResponse{"Sergio David"}
-	c.Data["json"] = &jsonResponse
+
+	err := json.Unmarshal([]byte(data), &jsonResponse)
+
+	if err != nil{
+		c.Data["json"] = `{"error": 0}`
+	}
+
+	c.Data["json"] = jsonResponse
 	c.ServeJSON()
 }
