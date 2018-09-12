@@ -12,24 +12,12 @@ import (
 )
 
 
-type MainController struct {
+type WeatherController struct {
 	beego.Controller
 }
 
 
-func (c *MainController) Get() {
-	c.Data["Website"] = "beego.me"
-	c.Data["Email"] = "astaxie@gmail.com"
-	c.TplName = "index.tpl"
-}
-
-
-type ApiController struct {
-	beego.Controller
-}
-
-
-func (c *ApiController) Get() {
+func (c *WeatherController) Get() {
 	var jsonResponse map[string]interface{}
 
 	city := c.GetString("city")
@@ -108,21 +96,30 @@ func (c *ApiController) Get() {
 	// Save request on MySQL
 	o := orm.NewOrm()
 	o.Using("default")
+
 	request := new(models.Request)
 	request.LocationName = response["location_name"].(string)
-	request.Temperature = response["temperature"].(string)
-	request.Wind = response["wind"].(string)
-	request.Pressure = response["pressure"].(string)
-	request.Humidity = response["humidity"].(string)
-	request.Lat = coord["lat"].(float64)
-	request.Long = coord["lon"].(float64)
-	request.Sunset = sunset
-	request.Sunrise = sunrise
-	request.RequestedTime = requestedTime
+	if created, id, err := o.ReadOrCreate(request, "LocationName"); err == nil {
+		if created {
+			fmt.Printf(">>>>>>>>>>%s", response["temperature"].(string))
+			request.LocationName = response["location_name"].(string)
+			request.Temperature = response["temperature"].(string)
+			request.Wind = response["wind"].(string)
+			request.Pressure = response["pressure"].(string)
+			request.Humidity = response["humidity"].(string)
+			request.Lat = coord["lat"].(float64)
+			request.Long = coord["lon"].(float64)
+			request.Sunset = sunset
+			request.Sunrise = sunrise
+			request.RequestedTime = requestedTime
 
-	id, err := o.Insert(request)
-	if err != nil {
-		fmt.Println(id)
+			// id, err := o.Insert(request)
+			// if err != nil {
+				// 	fmt.Println(id)
+			// }
+			} else {
+				fmt.Printf("Object %d already exists", id)
+		}
 	}
 
 	// Response to client

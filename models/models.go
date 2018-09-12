@@ -26,11 +26,7 @@ func (this *Request) TableName() string {
 }
 
 func init() {
-    // Need to register model in init
+	// Need to register model in init
 	orm.RegisterModel(new(Request))
-	// err := orm.RunSyncdb("default", true, true)
-	// if err != nil{
-	// 	fmt.Println(err)
-	// }
 }
 
