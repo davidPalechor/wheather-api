@@ -1,11 +1,14 @@
 package controllers
 
 import (
+	"WheatherAPI/models"
 	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/httplib"
+	"github.com/astaxie/beego/orm"
 	"encoding/json"
 	"time"
+	_ "WheatherAPI/models"
 )
 
 
@@ -45,12 +48,15 @@ func (c *ApiController) Get() {
 	main := jsonResponse["main"].(map[string] interface {})
 	sys := jsonResponse["sys"].(map[string] interface{})
 	wind := jsonResponse["wind"].(map[string] interface{})
+	if dir := wind["deg"]; dir == nil {
+		wind["deg"] = 0.0
+	}
 	coord := jsonResponse["coord"].(map[string] interface{})
 	sunrise := time.Unix(int64(sys["sunrise"].(float64)), 0)
 	sunset := time.Unix(int64(sys["sunset"].(float64)), 0)
 	requestedTime := time.Unix(int64(jsonResponse["dt"].(float64)), 0)
 
-	c.Data["json"] = map[string]interface{}{
+	response := map[string]interface{}{
 		"location_name": fmt.Sprintf(
 			"%s, %s",
 			jsonResponse["name"],
@@ -98,6 +104,29 @@ func (c *ApiController) Get() {
 			requestedTime.Second(),
 		),
 	}
+
+	// Save request on MySQL
+	o := orm.NewOrm()
+	o.Using("default")
+	request := new(models.Request)
+	request.LocationName = response["location_name"].(string)
+	request.Temperature = response["temperature"].(string)
+	request.Wind = response["wind"].(string)
+	request.Pressure = response["pressure"].(string)
+	request.Humidity = response["humidity"].(string)
+	request.Lat = coord["lat"].(float64)
+	request.Long = coord["lon"].(float64)
+	request.Sunset = sunset
+	request.Sunrise = sunrise
+	request.RequestedTime = requestedTime
+
+	id, err := o.Insert(request)
+	if err != nil {
+		fmt.Println(id)
+	}
+
+	// Response to client
+	c.Data["json"] = response
 	c.ServeJSON()
 }
 
