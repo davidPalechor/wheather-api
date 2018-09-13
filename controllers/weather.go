@@ -98,27 +98,74 @@ func (c *WeatherController) Get() {
 	o.Using("default")
 
 	request := new(models.Request)
-	request.LocationName = response["location_name"].(string)
-	if created, id, err := o.ReadOrCreate(request, "LocationName"); err == nil {
-		if created {
-			fmt.Printf(">>>>>>>>>>%s", response["temperature"].(string))
-			request.LocationName = response["location_name"].(string)
-			request.Temperature = response["temperature"].(string)
-			request.Wind = response["wind"].(string)
-			request.Pressure = response["pressure"].(string)
-			request.Humidity = response["humidity"].(string)
-			request.Lat = coord["lat"].(float64)
-			request.Long = coord["lon"].(float64)
-			request.Sunset = sunset
-			request.Sunrise = sunrise
-			request.RequestedTime = requestedTime
+	err = o.QueryTable("request").Filter(
+		"LocationName",
+		response["location_name"].(string),
+	).OrderBy("-id").Limit(1).One(request)
 
-			// id, err := o.Insert(request)
-			// if err != nil {
-				// 	fmt.Println(id)
-			// }
-			} else {
-				fmt.Printf("Object %d already exists", id)
+	if err == orm.ErrNoRows {
+		request.LocationName = response["location_name"].(string)
+		request.Temperature = response["temperature"].(string)
+		request.Wind = response["wind"].(string)
+		request.Pressure = response["pressure"].(string)
+		request.Humidity = response["humidity"].(string)
+		request.Lat = coord["lat"].(float64)
+		request.Long = coord["lon"].(float64)
+		request.Sunset = sunset
+		request.Sunrise = sunrise
+		request.RequestedTime = requestedTime
+
+		id, err := o.Insert(request)
+		if err != nil {
+			fmt.Println(id)
+		}
+	} else {
+		if now := time.Now().Add(5*time.Hour); now.Sub(request.Timestamp).Seconds() > 300 {
+			newRequest := new(models.Request)
+			newRequest.LocationName = response["location_name"].(string)
+			newRequest.Temperature = response["temperature"].(string)
+			newRequest.Wind = response["wind"].(string)
+			newRequest.Pressure = response["pressure"].(string)
+			newRequest.Humidity = response["humidity"].(string)
+			newRequest.Lat = coord["lat"].(float64)
+			newRequest.Long = coord["lon"].(float64)
+			newRequest.Sunset = sunset
+			newRequest.Sunrise = sunrise
+			newRequest.RequestedTime = requestedTime
+
+			id, err := o.Insert(newRequest)
+			if err != nil {
+				fmt.Println(id)
+			}
+		} else {
+			response["location_name"] = request.LocationName
+			response["temperature"] = request.Temperature
+			response["wind"] = request.Wind
+			response["pressure"] = request.Pressure
+			response["humidity"] = request.Humidity
+			response["geo_coordinates"] = []float64 {
+				request.Lat,
+				request.Long,
+			}
+			response["sunrise"] = fmt.Sprintf(
+				"%02d:%02d",
+				request.Sunrise.Hour(),
+				request.Sunrise.Minute(),
+			)
+			response["sunset"] = fmt.Sprintf(
+				"%02d:%02d",
+				request.Sunset.Hour(),
+				request.Sunset.Minute(),
+			)
+			response["requested_time"] = fmt.Sprintf(
+				"%d-%02d-%02d %02d:%02d:%02d",
+				request.RequestedTime.Year(),
+				request.RequestedTime.Month(),
+				request.RequestedTime.Day(),
+				request.RequestedTime.Hour(),
+				request.RequestedTime.Minute(),
+				request.RequestedTime.Second(),
+			)
 		}
 	}
 
