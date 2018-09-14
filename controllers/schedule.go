@@ -15,10 +15,10 @@ type ScheduleController struct {
 func (c *ScheduleController) Put() {
 	city := c.GetString("city")
 	country := c.GetString("country")
-	err := tasks.WeatherTask(city, country)
-	if err != nil {
-		fmt.Println(err)
-	}
+	fmt.Print(city, country)
+	tasks.WeatherTask(city, country)
+
+	c.Ctx.ResponseWriter.WriteHeader(200)
 	// Response to client
 	return
 }

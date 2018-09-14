@@ -12,6 +12,7 @@ import (
 
 
 func WeatherReporter(city string, country string)(response map[string]interface{}){
+	fmt.Println("Retrieving weather info")
 	response = make(map[string] interface{})
 
 	var jsonResponse map[string]interface{}
