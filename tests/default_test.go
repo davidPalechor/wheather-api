@@ -53,4 +53,3 @@ func TestWeatherApi(t *testing.T) {
 		})
 	})
 }
-
