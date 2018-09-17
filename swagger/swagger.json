@@ -1,0 +1,100 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Weather API",
+        "description": "API for viewing weather actual status.",
+        "version": "1.0.0",
+        "contact": {
+            "email": "sergio.palechor@globant.com"
+        }
+    },
+    "basePath": "/v1",
+    "paths": {
+        "/scheduler/weather/": {
+            "put": {
+                "tags": [
+                    "scheduler/weather"
+                ],
+                "summary": "Put",
+                "description": "Retrieve weather info about a City/Country",
+                "operationId": "ScheduleController.Put",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "city",
+                        "description": "Name of the city capitilized e.g: Bogota",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "country",
+                        "description": "Code of country lowercased e.g: co (Colombia), uk (United Kingdom), ca (Canada)",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{string} \"Success\""
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/weather/": {
+            "get": {
+                "tags": [
+                    "weather"
+                ],
+                "summary": "Get",
+                "description": "Retrieve weather info about a City/Country",
+                "operationId": "WeatherController.Get",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "city",
+                        "description": "Name of the city capitilized e.g: Bogota",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "country",
+                        "description": "Code of country lowercased e.g: co (Colombia), uk (United Kingdom), ca (Canada)",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{string} \"Success\""
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        }
+    }
+}
