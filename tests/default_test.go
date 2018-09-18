@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"testing"
+
 	_ "WheatherAPI/routers"
 
 	"github.com/astaxie/beego"
@@ -39,8 +40,6 @@ func init() {
 	}
 }
 
-
-// TestBeego is a sample to run an endpoint test
 func TestWeatherApi(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/v1/weather?city=Bogota&country=co", nil)
 	w := httptest.NewRecorder()

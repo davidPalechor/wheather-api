@@ -11,20 +11,29 @@ import (
 )
 
 
-func WeatherReporter(city string, country string)(response map[string]interface{}){
-	fmt.Println("Retrieving weather info")
+func weatherAPIRequest(city string, country string)(response map[string]interface{}, apiError error) {
 	response = make(map[string] interface{})
-
-	var jsonResponse map[string]interface{}
 
 	url := fmt.Sprintf("http://api.openweathermap.org/data/2.5/weather?q=%s,%s&appid=1508a9a4840a5574c822d70ca2132032", city, country)
 	req := httplib.Get(url)
 	data, _ := req.String()
 
-	err := json.Unmarshal([]byte(data), &jsonResponse)
+	err := json.Unmarshal([]byte(data), &response)
+	if err != nil {
+		apiError = err
+	}
 
-	if err != nil{
-		fmt.Println(err)
+	return
+}
+
+
+func WeatherReporter(city string, country string)(response map[string]interface{}, bckErr error) {
+	fmt.Println("Retrieving weather info")
+	response = make(map[string] interface{})
+
+	jsonResponse, err := weatherAPIRequest(city, country)
+	if err != nil {
+		return
 	}
 
 	main := jsonResponse["main"].(map[string] interface {})
@@ -107,9 +116,9 @@ func WeatherReporter(city string, country string)(response map[string]interface{
 		request.Sunrise = sunrise
 		request.RequestedTime = requestedTime
 
-		id, err := o.Insert(request)
+		_, err := o.Insert(request)
 		if err != nil {
-			fmt.Println(id)
+			bckErr = err
 		}
 	} else {
 		if now := now(); now.Sub(request.Timestamp).Seconds() > 300 {
@@ -125,9 +134,9 @@ func WeatherReporter(city string, country string)(response map[string]interface{
 			newRequest.Sunrise = sunrise
 			newRequest.RequestedTime = requestedTime
 
-			id, err := o.Insert(newRequest)
+			_, err := o.Insert(newRequest)
 			if err != nil {
-				fmt.Println(id)
+				bckErr = err
 			}
 		} else {
 			response["location_name"] = request.LocationName
