@@ -112,7 +112,7 @@ func WeatherReporter(city string, country string)(response map[string]interface{
 			fmt.Println(id)
 		}
 	} else {
-		if now := now().Add(5*time.Hour); now.Sub(request.Timestamp).Seconds() > 300 {
+		if now := now(); now.Sub(request.Timestamp).Seconds() > 300 {
 			newRequest := new(models.Request)
 			newRequest.LocationName = response["location_name"].(string)
 			newRequest.Temperature = response["temperature"].(string)

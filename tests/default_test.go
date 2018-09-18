@@ -1,15 +1,19 @@
 package test
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"testing"
-	"runtime"
+	"os"
 	"path/filepath"
-	"encoding/json"
+	"runtime"
+	"testing"
 	_ "WheatherAPI/routers"
 
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/orm"
+	_ "github.com/go-sql-driver/mysql"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -17,12 +21,28 @@ func init() {
 	_, file, _, _ := runtime.Caller(1)
 	apppath, _ := filepath.Abs(filepath.Dir(filepath.Join(file, ".." + string(filepath.Separator))))
 	beego.TestBeegoInit(apppath)
+
+	orm.RegisterDriver("mysql", orm.DRMySQL)
+	err := orm.RegisterDataBase(
+		"default",
+		"mysql",
+		fmt.Sprintf(
+			"%s:%s@tcp(%s)/%s?charset=utf8",
+			beego.AppConfig.String("mysqluser"),
+			beego.AppConfig.String("mysqlpswd"),
+			os.Getenv("DB_HOST"),
+			beego.AppConfig.String("mysqldb"),
+		),
+	)
+	if err != nil {
+		fmt.Printf("%v", err)
+	}
 }
 
 
 // TestBeego is a sample to run an endpoint test
 func TestWeatherApi(t *testing.T) {
-	r, _ := http.NewRequest("GET", "/weather?city=Bogota&country=co", nil)
+	r, _ := http.NewRequest("GET", "/v1/weather?city=Bogota&country=co", nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
