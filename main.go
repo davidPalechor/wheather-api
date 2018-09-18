@@ -6,6 +6,8 @@ import (
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/astaxie/beego/toolbox"
+	"os"
+	"fmt"
 )
 
 func init() {
@@ -16,13 +18,19 @@ func init() {
 	orm.RegisterDataBase(
 		"default",
 		"mysql",
-		"root:root@tcp(127.0.0.1:3306)/weather?charset=utf8",
+		fmt.Sprintf(
+			"root:root@tcp(%s)/weather?charset=utf8",
+			os.Getenv("DB_HOST"),
+		),
 	)
 }
 
 func main() {
 	defer toolbox.StopTask()
-
+	fmt.Printf(
+		"root:root@tcp(%s)/weather?charset=utf8",
+		os.Getenv("DB_HOST"),
+	)
 	if beego.BConfig.RunMode == "dev" {
 		beego.BConfig.WebConfig.DirectoryIndex = true
 		beego.BConfig.WebConfig.StaticDir["/swagger"] = "swagger"

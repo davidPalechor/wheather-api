@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  db:
+    image: mysql:5.7.23
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: weather
+
+  web:
+    build: .
+    command: bee run -downdoc=true -gendoc=true
+    volumes:
+      - .:/go/src/WheatherAPI
+    working_dir: /go/src/WheatherAPI
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: db:3306
+    depends_on:
+      - db
