@@ -6,8 +6,12 @@ import (
 )
 
 func WeatherTask(city string, country string) error {
+	request := utils.Request {
+		City:		city,
+		Country:	country,
+	}
 	task := toolbox.NewTask("weatherTask", "* * */1 * * *", func() error{
-		utils.WeatherReporter(city, country)
+		request.WeatherReporter()
 		return nil
 	})
 	toolbox.AddTask("weatherTask", task)

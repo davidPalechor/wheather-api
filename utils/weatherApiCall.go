@@ -10,11 +10,20 @@ import (
 	_ "WheatherAPI/models"
 )
 
+type WeatherService interface {
+	WeatherAPIRequest()(response map[string]interface{}, apiError error)
+}
 
-func weatherAPIRequest(city string, country string)(response map[string]interface{}, apiError error) {
+
+type Request struct {
+	City, Country string
+}
+
+
+func (r *Request) WeatherAPIRequest()(response map[string]interface{}, apiError error) {
 	response = make(map[string] interface{})
 
-	url := fmt.Sprintf("http://api.openweathermap.org/data/2.5/weather?q=%s,%s&appid=1508a9a4840a5574c822d70ca2132032", city, country)
+	url := fmt.Sprintf("http://api.openweathermap.org/data/2.5/weather?q=%s,%s&appid=1508a9a4840a5574c822d70ca2132032", r.City, r.Country)
 	req := httplib.Get(url)
 	data, _ := req.String()
 
@@ -27,11 +36,11 @@ func weatherAPIRequest(city string, country string)(response map[string]interfac
 }
 
 
-func WeatherReporter(city string, country string)(response map[string]interface{}, bckErr error) {
+func (r *Request) WeatherReporter()(response map[string]interface{}, bckErr error) {
 	fmt.Println("Retrieving weather info")
 	response = make(map[string] interface{})
 
-	jsonResponse, err := weatherAPIRequest(city, country)
+	jsonResponse, err := r.WeatherAPIRequest()
 	if err != nil {
 		return
 	}

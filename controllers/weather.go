@@ -21,11 +21,15 @@ type WeatherController struct {
 // @Accept json
 // @router / [get]
 func (c *WeatherController) Get() {
-	city := c.GetString("city")
-	country := c.GetString("country")
-	response,_ := utils.WeatherReporter(city, country)
+	defer c.ServeJSON()
+
+	request := utils.Request {
+		City:		c.GetString("city"),
+		Country:	c.GetString("country"),
+	}
+
+	response,_ := request.WeatherReporter()
 
 	// Response to client
 	c.Data["json"] = response
-	c.ServeJSON()
 }
