@@ -20,7 +20,7 @@ type Request struct {
 }
 
 
-func (r *Request) WeatherAPIRequest()(response map[string]interface{}, apiError error) {
+func (r Request) WeatherAPIRequest()(response map[string]interface{}, apiError error) {
 	response = make(map[string] interface{})
 
 	url := fmt.Sprintf("http://api.openweathermap.org/data/2.5/weather?q=%s,%s&appid=1508a9a4840a5574c822d70ca2132032", r.City, r.Country)
@@ -36,7 +36,7 @@ func (r *Request) WeatherAPIRequest()(response map[string]interface{}, apiError 
 }
 
 
-func (r *Request) WeatherReporter()(response map[string]interface{}, bckErr error) {
+func WeatherReporter(r WeatherService)(response map[string]interface{}, bckErr error) {
 	fmt.Println("Retrieving weather info")
 	response = make(map[string] interface{})
 

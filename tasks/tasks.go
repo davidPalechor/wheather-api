@@ -11,7 +11,7 @@ func WeatherTask(city string, country string) error {
 		Country:	country,
 	}
 	task := toolbox.NewTask("weatherTask", "* * */1 * * *", func() error{
-		request.WeatherReporter()
+		utils.WeatherReporter(request)
 		return nil
 	})
 	toolbox.AddTask("weatherTask", task)

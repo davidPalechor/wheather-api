@@ -6,6 +6,7 @@ import (
 	// "fmt"
 )
 
+// Request _
 type Request struct {
 	Id 				int
 	LocationName 	string

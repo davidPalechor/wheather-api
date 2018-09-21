@@ -28,7 +28,7 @@ func (c *WeatherController) Get() {
 		Country:	c.GetString("country"),
 	}
 
-	response,_ := request.WeatherReporter()
+	response,_ := utils.WeatherReporter(request)
 
 	// Response to client
 	c.Data["json"] = response

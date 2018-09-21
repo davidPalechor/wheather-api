@@ -2,14 +2,17 @@ package test
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"net/http"
-	"net/http/httptest"
+	// "net/http"
+	// "net/http/httptest"
 	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
 
+	"WheatherAPI/utils"
+	"WheatherAPI/tests/mocks"
 	_ "WheatherAPI/routers"
 
 	"github.com/astaxie/beego"
@@ -40,22 +43,29 @@ func init() {
 	}
 }
 
+
+type MockRequest struct {
+	City, Country string
+}
+
+func (mock MockRequest) WeatherAPIRequest()(map[string]interface{}, error){
+	if mock.City != "Bogota" || mock.Country != "co" {
+		return nil, errors.New("City not found")
+	}
+	response := make(map[string] interface{})
+	json.Unmarshal([]byte(mocks.WeatherResponse), &response)
+	return response, nil
+}
+
+
 func TestWeatherApi(t *testing.T) {
-	r, _ := http.NewRequest("GET", "/v1/weather?city=Bogota&country=co", nil)
-	w := httptest.NewRecorder()
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
+	m := MockRequest{
+		City: "Bogota",
+		Country: "co",
+	}
 
-	var jsonResponse map[string] interface{}
-
-	err := json.Unmarshal([]byte(w.Body.String()), &jsonResponse)
-
+	jsonResponse, _ := utils.WeatherReporter(m)
 	Convey("Test Weather Endpoint", t, func(){
-		Convey("Status should be 200", func(){
-			So(w.Code, ShouldEqual, 200)
-		})
-		Convey("Body must be a valid JSON", func(){
-			So(err == nil, ShouldBeTrue)
-		})
 		Convey("Body must contain all fields", func(){
 			So(
 				jsonResponse["location_name"] != nil &&
